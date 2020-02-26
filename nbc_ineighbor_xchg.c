@@ -198,7 +198,7 @@ DCMF_Request_t *DCMF_Manytomany_cb (unsigned cid,
 int NBC_Ineighbor_xchg(void *sbuf, int scount, MPI_Datatype stype,
         void *rbuf, int rcount, MPI_Datatype rtype, MPI_Comm comm, NBC_Handle* handle) {
   int rank, size, res, worldsize, i;
-  MPI_Aint sndext, rcvext;
+  MPI_Aint sndext, rcvext, lb;
   
   double t[10];
   t[0] = PMPI_Wtime();
@@ -212,10 +212,10 @@ int NBC_Ineighbor_xchg(void *sbuf, int scount, MPI_Datatype stype,
   res = MPI_Comm_rank(comm, &rank);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_rank() (%i)\n", res); return res; }
 
-  res = MPI_Type_extent(stype, &sndext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
-  res = MPI_Type_extent(rtype, &rcvext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(stype, &lb, &sndext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(rtype, &lb, &rcvext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
 
   t[1] = PMPI_Wtime();
   

@@ -42,7 +42,7 @@ int NBC_Alltoall_args_compare(NBC_Alltoall_args *a, NBC_Alltoall_args *b, void *
 int NBC_Ialltoall(void* sendbuf, int sendcount, MPI_Datatype sendtype, void* recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm, NBC_Handle *handle)  {
   int rank, p, res, a2asize, sndsize, datasize;
   NBC_Schedule *schedule;
-  MPI_Aint rcvext, sndext;
+  MPI_Aint rcvext, sndext, lb;
 #ifdef NBC_CACHE_SCHEDULE
   NBC_Alltoall_args *args, *found, search;
 #endif
@@ -57,10 +57,10 @@ int NBC_Ialltoall(void* sendbuf, int sendcount, MPI_Datatype sendtype, void* rec
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_rank() (%i)\n", res); return res; }
   res = MPI_Comm_size(comm, &p);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_size() (%i)\n", res); return res; }
-  res = MPI_Type_extent(sendtype, &sndext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
-  res = MPI_Type_extent(recvtype, &rcvext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(sendtype, &lb, &sndext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(recvtype, &lb, &rcvext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
   res = MPI_Type_size(sendtype, &sndsize);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_size() (%i)\n", res); return res; }
 

@@ -40,7 +40,7 @@ int NBC_Ineighbor_alltoallw_args_compare(NBC_Ineighbor_alltoallw_args *a, NBC_In
 int NBC_Ineighbor_alltoallw(void *sbuf, int *scounts, MPI_Datatype *stypes,
         void *rbuf, int *rcounts, MPI_Datatype *rtypes, MPI_Comm comm, NBC_Handle* handle) {
   int rank, size, res, worldsize, i;
-  MPI_Aint *sndexts, *rcvexts;
+  MPI_Aint *sndexts, *rcvexts, lb;
   
   double t[10];
   t[0] = PMPI_Wtime();
@@ -92,13 +92,13 @@ int NBC_Ineighbor_alltoallw(void *sbuf, int *scounts, MPI_Datatype *stypes,
 
       sndexts = (MPI_Aint*)malloc(sizeof(MPI_Aint)*outdegree);
       for(i=0; i<outdegree; ++i) {
-        res = MPI_Type_extent(stypes[i], &sndexts[i]);
-        if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+        res = MPI_Type_get_extent(stypes[i], &lb, &sndexts[i]);
+        if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
       }
       rcvexts = (MPI_Aint*)malloc(sizeof(MPI_Aint)*indegree);
       for(i=0; i<indegree; ++i) {
-        res = MPI_Type_extent(rtypes[i], &rcvexts[i]);
-        if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+        res = MPI_Type_get_extent(rtypes[i], &lb, &rcvexts[i]);
+        if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
       }
 
       res = NBC_Comm_neighbors(comm, indegree, srcs, MPI_UNWEIGHTED, outdegree, dsts, MPI_UNWEIGHTED);

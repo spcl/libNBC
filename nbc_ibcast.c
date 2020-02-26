@@ -206,14 +206,14 @@ static __inline__ int bcast_sched_linear(int rank, int p, int root, NBC_Schedule
 /* simple chained MPI_Ibcast */
 static __inline__ int bcast_sched_chain(int rank, int p, int root, NBC_Schedule *schedule, void *buffer, int count, MPI_Datatype datatype, int fragsize, int size) {
   int res, vrank, rpeer, speer, numfrag, fragnum, fragcount, thiscount;
-  MPI_Aint ext;
+  MPI_Aint ext, lb;
   char *buf;
 
   RANK2VRANK(rank, vrank, root);
   VRANK2RANK(rpeer, vrank-1, root);
   VRANK2RANK(speer, vrank+1, root);
-  res = MPI_Type_extent(datatype, &ext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(datatype, &lb, &ext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
   
   if(count == 0) return NBC_OK;
 

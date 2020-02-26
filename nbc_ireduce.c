@@ -40,7 +40,7 @@ int NBC_Reduce_args_compare(NBC_Reduce_args *a, NBC_Reduce_args *b, void *param)
 /* the non-blocking reduce */
 int NBC_Ireduce(void* sendbuf, void* recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm, NBC_Handle* handle) {
   int rank, p, res, segsize, size;
-  MPI_Aint ext;
+  MPI_Aint ext, lb;
   NBC_Schedule *schedule;
   char *redbuf=NULL, inplace;
 #ifdef NBC_CACHE_SCHEDULE
@@ -56,8 +56,8 @@ int NBC_Ireduce(void* sendbuf, void* recvbuf, int count, MPI_Datatype datatype, 
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_rank() (%i)\n", res); return res; }
   res = MPI_Comm_size(comm, &p);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_size() (%i)\n", res); return res; }
-  res = MPI_Type_extent(datatype, &ext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(datatype, &lb, &ext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
   res = MPI_Type_size(datatype, &size);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_size() (%i)\n", res); return res; }
   

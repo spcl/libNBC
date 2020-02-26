@@ -41,7 +41,7 @@ int NBC_Scan_args_compare(NBC_Scan_args *a, NBC_Scan_args *b, void *param) {
 #endif
 int NBC_Iscan(void* sendbuf, void* recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm, NBC_Handle* handle) {
   int rank, p, res;
-  MPI_Aint ext;
+  MPI_Aint ext, lb;
   NBC_Schedule *schedule;
 #ifdef NBC_CACHE_SCHEDULE
   NBC_Scan_args *args, *found, search;
@@ -56,8 +56,8 @@ int NBC_Iscan(void* sendbuf, void* recvbuf, int count, MPI_Datatype datatype, MP
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_rank() (%i)\n", res); return res; }
   res = MPI_Comm_size(comm, &p);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_size() (%i)\n", res); return res; }
-  res = MPI_Type_extent(datatype, &ext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(datatype, &lb, &ext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
   
   handle->tmpbuf = malloc(ext*count);
   if(handle->tmpbuf == NULL) { printf("Error in malloc()\n"); return NBC_OOR; }

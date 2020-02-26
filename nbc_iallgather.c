@@ -40,7 +40,7 @@ int NBC_Allgather_args_compare(NBC_Allgather_args *a, NBC_Allgather_args *b, voi
  * each node receives from it's left (modulo p) neighbor */
 int NBC_Iallgather(void* sendbuf, int sendcount, MPI_Datatype sendtype, void* recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm, NBC_Handle *handle) {
   int rank, p, res, r;
-  MPI_Aint rcvext, sndext;
+  MPI_Aint rcvext, sndext, lb;
   NBC_Schedule *schedule;
   char *rbuf, *sbuf, inplace;
 #ifdef NBC_CACHE_SCHEDULE
@@ -55,10 +55,10 @@ int NBC_Iallgather(void* sendbuf, int sendcount, MPI_Datatype sendtype, void* re
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_rank() (%i)\n", res); return res; }
   res = MPI_Comm_size(comm, &p);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_size() (%i)\n", res); return res; }
-  res = MPI_Type_extent(sendtype, &sndext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
-  res = MPI_Type_extent(recvtype, &rcvext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(sendtype, &lb, &sndext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(recvtype, &lb, &rcvext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
 
   handle->tmpbuf = NULL;
 

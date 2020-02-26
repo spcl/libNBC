@@ -137,6 +137,7 @@ printf("[%i] LibNBC starting allreduce\n", r);
 printf("[%i] LibNBC after allreduce\n", r);
 
 #else  
+  MPI_Aint lb;
   NBC_IN_PLACE(sendbuf, recvbuf, inplace);
   
   res = NBC_Init_handle(handle, comm);
@@ -145,8 +146,8 @@ printf("[%i] LibNBC after allreduce\n", r);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_rank() (%i)\n", res); return res; }
   res = MPI_Comm_size(comm, &p);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_size() (%i)\n", res); return res; }
-  res = MPI_Type_extent(datatype, &ext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(datatype, &lb, &ext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
   res = MPI_Type_size(datatype, &size);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_size() (%i)\n", res); return res; }
   

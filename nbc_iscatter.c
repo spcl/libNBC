@@ -37,7 +37,7 @@ int NBC_Scatter_args_compare(NBC_Scatter_args *a, NBC_Scatter_args *b, void *par
 #endif
 int NBC_Iscatter(void* sendbuf, int sendcount, MPI_Datatype sendtype, void* recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm, NBC_Handle* handle) {
   int rank, p, res, i;
-  MPI_Aint sndext;
+  MPI_Aint sndext, lb;
   NBC_Schedule *schedule;
   char *sbuf, inplace;
 #ifdef NBC_CACHE_SCHEDULE
@@ -52,8 +52,8 @@ int NBC_Iscatter(void* sendbuf, int sendcount, MPI_Datatype sendtype, void* recv
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_rank() (%i)\n", res); return res; }
   res = MPI_Comm_size(comm, &p);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_size() (%i)\n", res); return res; }
-  res = MPI_Type_extent(sendtype, &sndext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(sendtype, &lb, &sndext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
 
   handle->tmpbuf=NULL;
  

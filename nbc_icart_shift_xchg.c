@@ -45,7 +45,7 @@ int NBC_Icart_shift_xchg_args_compare(NBC_Icart_shift_xchg_args *a, NBC_Icart_sh
 int NBC_Icart_shift_xchg(void *sbuf, int scount, MPI_Datatype stype, void *rbuf, int rcount, MPI_Datatype rtype, int direction, int
         disp, MPI_Comm comm,  NBC_Handle* handle) {
   int res, speer, rpeer;
-  MPI_Aint ext;
+  MPI_Aint ext, lb;
   char inplace;
   NBC_Schedule *schedule;
 #ifdef NBC_CACHE_SCHEDULE
@@ -83,8 +83,8 @@ int NBC_Icart_shift_xchg(void *sbuf, int scount, MPI_Datatype stype, void *rbuf,
     /* create schedule - the non-inplace case is easy - the inplace-case
      * needs an extra buffer :-( */
     if(inplace) { /* we need an extra buffer to be deadlock-free */
-      res = MPI_Type_extent(rtype, &ext);
-      if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+      res = MPI_Type_get_extent(rtype, &lb, &ext);
+      if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
       handle->tmpbuf = malloc(ext*scount);
 
       res = NBC_Sched_recv(0, true, rcount, rtype, rpeer, schedule);

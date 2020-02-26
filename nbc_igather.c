@@ -37,7 +37,7 @@ int NBC_Gather_args_compare(NBC_Gather_args *a, NBC_Gather_args *b, void *param)
 
 int NBC_Igather(void* sendbuf, int sendcount, MPI_Datatype sendtype, void* recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm, NBC_Handle* handle) {
   int rank, p, res, i;
-  MPI_Aint rcvext;
+  MPI_Aint rcvext, lb;
   NBC_Schedule *schedule;
   char *rbuf, inplace;
 #ifdef NBC_CACHE_SCHEDULE
@@ -52,8 +52,8 @@ int NBC_Igather(void* sendbuf, int sendcount, MPI_Datatype sendtype, void* recvb
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_rank() (%i)\n", res); return res; }
   res = MPI_Comm_size(comm, &p);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_rank() (%i)\n", res); return res; }
-  res = MPI_Type_extent(recvtype, &rcvext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(recvtype, &lb, &rcvext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
 
   handle->tmpbuf = NULL;
   

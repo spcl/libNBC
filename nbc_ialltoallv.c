@@ -25,7 +25,7 @@ int NBC_Ialltoallv(void* sendbuf, int *sendcounts, int *sdispls,
     MPI_Datatype recvtype, MPI_Comm comm, NBC_Handle* handle) {
   
   int rank, p, res, i;
-  MPI_Aint sndext, rcvext;
+  MPI_Aint sndext, rcvext, lb;
   NBC_Schedule *schedule;
   char *rbuf, *sbuf, inplace;
   
@@ -37,10 +37,10 @@ int NBC_Ialltoallv(void* sendbuf, int *sendcounts, int *sdispls,
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_rank() (%i)\n", res); return res; }
   res= MPI_Comm_size(comm, &p);
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Comm_size() (%i)\n", res); return res; }
-  res = MPI_Type_extent(sendtype, &sndext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
-  res = MPI_Type_extent(recvtype, &rcvext);
-  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(sendtype, &lb, &sndext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
+  res = MPI_Type_get_extent(recvtype, &lb, &rcvext);
+  if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_get_extent() (%i)\n", res); return res; }
 
   schedule = (NBC_Schedule*)malloc(sizeof(NBC_Schedule));
   if (NULL == schedule) { printf("Error in malloc() (%i)\n", res); return res; }
