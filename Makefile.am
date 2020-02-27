@@ -40,7 +40,7 @@ ofdir = of
 oflibs = of/libof.la
 endif
 
-SUBDIRS = libdict $(ofdir)
+SUBDIRS = libdict tests $(ofdir)
 
 lib_LTLIBRARIES = libnbc.la
 
