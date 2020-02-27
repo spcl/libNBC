@@ -57,7 +57,10 @@ TEST_DCMF
 TEST_MPI22
 AM_CONDITIONAL([HAVE_OFED], [test x$with_ofed != x])
 
-AC_CONFIG_FILES([Makefile libdict/Makefile of/Makefile])
+AC_ARG_ENABLE([goaloutput], AS_HELP_STRING([--enable-goaloutput]), AC_DEFINE([GOALOUTPUT], [], Enable GOAL schedule printing) )
+AS_IF([test "x$enable_goaloutput" = "xyes"], [AC_DEFINE([GOALOUTPUT], [], Enable GOAL schedule printing)] )
+
+AC_CONFIG_FILES([Makefile libdict/Makefile of/Makefile tests/Makefile])
 AC_OUTPUT
 
 echo ""

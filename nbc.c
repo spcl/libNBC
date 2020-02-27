@@ -9,6 +9,7 @@
  *
  */
 #include "nbc_internal.h"
+#include <unistd.h>
 
 /* only used in this file */
 static inline int NBC_Start_round(NBC_Handle *handle);
@@ -964,8 +965,91 @@ NBC_Comminfo* NBC_Init_comm(MPI_Comm comm) {
 
 int NBC_Start(NBC_Handle *handle, NBC_Schedule *schedule) {
   int res;
+#ifdef GOALOUTPUT
+  if (getenv("LIBNBC_WRITE_SCHED")) {
+    static int sched_cnt = 1;
+    char* fname = (char*) malloc(1024);
+    int ret = snprintf(fname, 1024, "%s_sched_%i.goal", getenv("LIBNBC_WRITE_SCHED"), sched_cnt++);
+    assert(ret < 1024);
+    assert(access( fname, F_OK ) != 0); //abort if file exists
+    FILE* fout = fopen(fname, "w");
+    assert(fout);
+    int commsize, myrank;
+    MPI_Comm_rank(handle->mycomm, &myrank);
+    MPI_Comm_size(handle->mycomm, &commsize);
+    int localsched_size;
+    int* sched_sizes = (int*) malloc(commsize*sizeof(int));
+    int* sched_displ = (int*) malloc(commsize*sizeof(int));
+    NBC_GET_SIZE(*schedule, localsched_size);
 
-  handle->schedule = schedule;
+    // copy the local schedule and resolve datatype size (int bytes) -- this needs to be done locally as DDT are non-copyable among ranks
+    char* localsched = (char*) malloc(localsched_size);
+    memcpy(localsched, *schedule, localsched_size);
+    // first int is overall size
+    char* ptr = localsched + sizeof(int);
+    int round_size;
+    while ((long)ptr-(long)localsched < localsched_size) {
+          NBC_GET_ROUND_SIZE(ptr, round_size);
+          NBC_TRANSFORM_ROUND_GOAL(ptr);
+          ptr=ptr+round_size;
+          ptr=ptr+sizeof(char);
+    }
+
+    MPI_Gather(&localsched_size, 1, MPI_INT, sched_sizes, 1, MPI_INT, 0, handle->mycomm);
+    sched_displ[0] = 0;
+    for (int rank=1; rank<commsize; rank++) {
+      sched_displ[rank] = sched_displ[rank-1]+sched_sizes[rank-1];
+    }
+    char* schedules = (char*) NULL;
+    if (myrank == 0){
+	  schedules = (char*) malloc(sched_displ[commsize-1]+sched_sizes[commsize-1]);
+    }
+    MPI_Gatherv(localsched, localsched_size, MPI_BYTE, schedules, sched_sizes, sched_displ, MPI_BYTE, 0, handle->mycomm);
+    free(localsched);
+
+    if (myrank == 0) {
+      fprintf(fout, "num_ranks %i\n\n", commsize);
+      for (int rank=0; rank<commsize; rank++) {
+        fprintf(fout, "rank %i {\n", rank);
+        // transform the schedule into goal for each rank
+        /* ptr begins at first round (first int is overall size) */ \
+        char* ptr = (char*)((char*)schedules+sched_displ[rank] +sizeof(int));
+        int round_size;
+        int label = 1;
+	int label_before = 0;
+	int label_after = 0;
+	int oldlabel_before = 0;
+	int oldlabel_after = 0;
+        while ((long)ptr-(long)(schedules+sched_displ[rank]) < sched_sizes[rank]) {
+          NBC_GET_ROUND_SIZE(ptr, round_size);
+	  if (label_after - label_before) {
+	    // preserve the last full round as old (in case of empty rounds in the middle)
+	    oldlabel_before = label_before;
+	    oldlabel_after = label_after;
+	  }
+	  label_before = label;
+          NBC_PRINT_ROUND_GOAL(ptr, label, fout);
+	  label_after = label;
+	  // all labels between label_after - label_before require oldlabel_after - oldlabel_before
+	  for (int l=label_before; l<label_after; l++) {
+	    for (int ol=oldlabel_before; ol<oldlabel_after; ol++) {
+	      fprintf(fout, "  l%i requires l%i\n", l, ol);
+	    }
+	  }
+          ptr=ptr+round_size;
+          ptr=ptr+sizeof(char);
+        }
+        fprintf(fout, "}\n\n");
+      }
+    }
+
+    free(schedules);
+    free(sched_sizes);
+    free(sched_displ);
+ }
+#endif
+
+ handle->schedule = schedule;
 
 #ifdef HAVE_PROGRESS_THREAD 
   /* add handle to open handles - and give the control to the progress

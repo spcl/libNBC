@@ -447,6 +447,137 @@ int NBC_Create_fortran_handle(int *fhandle, NBC_Handle **handle);
   (*(int*)lastround)++; \
 }
 
+/* NBC_TRANSFORM_ROUND_GOAL sets the datatype arg to its actual size
+ * A round has the format:
+ * [num]{[op][op-data]} types: [int]{[enum][op-type]}
+ * e.g. [2][SEND][SEND-ARGS][RECV][RECV-ARGS] */
+#define NBC_TRANSFORM_ROUND_GOAL(schedule) \
+ {  \
+   int myrank, *numptr; \
+   NBC_Fn_type *typeptr; \
+   NBC_Args_send *sendargs; \
+   NBC_Args_recv *recvargs; \
+   NBC_Args_op *opargs; \
+   NBC_Args_copy *copyargs; \
+   NBC_Args_unpack *unpackargs; \
+   MPI_Aint lb; \
+   int ext=1; \
+   int i;  \
+     \
+   numptr = (int*)schedule; \
+   MPI_Comm_rank(MPI_COMM_WORLD, &myrank); \
+   /* printf("has %i actions: \n", *numptr); */ \
+   /* end is increased by sizeof(int) bytes to point to type */ \
+   typeptr = (NBC_Fn_type*)((int*)(schedule)+1); \
+   for (i=0; i<*numptr; i++) { \
+     /* go sizeof op-data forward */ \
+     switch(*typeptr) { \
+       case SEND: \
+         sendargs = (NBC_Args_send*)(typeptr+1); \
+	 MPI_Type_size(sendargs->datatype, &ext); \
+	 sendargs->datatype = (MPI_Datatype) ((intptr_t) ext); \
+         typeptr = (NBC_Fn_type*)((NBC_Args_send*)typeptr+1); \
+         break; \
+       case RECV: \
+         recvargs = (NBC_Args_recv*)(typeptr+1); \
+	 MPI_Type_size(recvargs->datatype, &ext); \
+	 recvargs->datatype = (MPI_Datatype) ((intptr_t) ext); \
+         typeptr = (NBC_Fn_type*)((NBC_Args_recv*)typeptr+1); \
+         break; \
+       case OP: \
+         opargs = (NBC_Args_op*)(typeptr+1); \
+	 MPI_Type_size(opargs->datatype, &ext); \
+	 opargs->datatype = (MPI_Datatype) ((intptr_t) ext); \
+         typeptr = (NBC_Fn_type*)((NBC_Args_op*)typeptr+1); \
+         break; \
+       case COPY: \
+         copyargs = (NBC_Args_copy*)(typeptr+1); \
+	 MPI_Type_size(copyargs->srctype, &ext); \
+	 copyargs->srctype =  (MPI_Datatype) ((intptr_t) ext); \
+	 MPI_Type_size(copyargs->tgttype, &ext); \
+	 copyargs->tgttype = (MPI_Datatype) ((intptr_t) ext); \
+	 typeptr = (NBC_Fn_type*)((NBC_Args_copy*)typeptr+1); \
+         break; \
+       case UNPACK: \
+         unpackargs = (NBC_Args_unpack*)(typeptr+1); \
+	 MPI_Type_size(unpackargs->datatype, &ext); \
+	 unpackargs->datatype = (MPI_Datatype) ((intptr_t) ext); \
+         typeptr = (NBC_Fn_type*)((NBC_Args_unpack*)typeptr+1); \
+         break; \
+       default: \
+         printf("[%i] NBC_PRINT_ROUND: bad type %li at offset %li\n", myrank, (long)*typeptr, (long)typeptr-(long)schedule); \
+         return NBC_BAD_SCHED; \
+     } \
+     /* increase ptr by size of fn_type enum */ \
+     typeptr = (NBC_Fn_type*)((NBC_Fn_type*)typeptr+1); \
+   } \
+ }
+
+
+
+/* NBC_PRINT_ROUND_GOAL prints a round in a schedule. A round has the format:
+ * [num]{[op][op-data]} types: [int]{[enum][op-type]}
+ * e.g. [2][SEND][SEND-ARGS][RECV][RECV-ARGS] */
+#define NBC_PRINT_ROUND_GOAL(schedule, label, fout) \
+ {  \
+   int myrank, *numptr; \
+   NBC_Fn_type *typeptr; \
+   NBC_Args_send *sendargs; \
+   NBC_Args_recv *recvargs; \
+   NBC_Args_op *opargs; \
+   NBC_Args_copy *copyargs; \
+   NBC_Args_unpack *unpackargs; \
+   MPI_Aint lb; \
+   int ext=1; \
+   int i;  \
+     \
+   numptr = (int*)schedule; \
+   MPI_Comm_rank(MPI_COMM_WORLD, &myrank); \
+   /* printf("has %i actions: \n", *numptr); */ \
+   /* end is increased by sizeof(int) bytes to point to type */ \
+   typeptr = (NBC_Fn_type*)((int*)(schedule)+1); \
+   for (i=0; i<*numptr; i++) { \
+     /* go sizeof op-data forward */ \
+     switch(*typeptr) { \
+       case SEND: \
+         sendargs = (NBC_Args_send*)(typeptr+1); \
+         fprintf(fout, "  l%i: send %ib to %i tag 0\n", label++, sendargs->count * ((unsigned long) sendargs->datatype), sendargs->dest); \
+         typeptr = (NBC_Fn_type*)((NBC_Args_send*)typeptr+1); \
+         break; \
+       case RECV: \
+         recvargs = (NBC_Args_recv*)(typeptr+1); \
+         fprintf(fout, "  l%i: recv %ib from %i tag 0\n", label++, recvargs->count * ((unsigned long) sendargs->datatype), recvargs->source); \
+         typeptr = (NBC_Fn_type*)((NBC_Args_recv*)typeptr+1); \
+         break; \
+       case OP: \
+         fprintf(fout, "[%i]  OP   (offset %li) ", myrank, (long)typeptr-(long)schedule); \
+         opargs = (NBC_Args_op*)(typeptr+1); \
+         fprintf(fout, "*buf1: %lu, buf2: %lu, count: %i, type: %lu)\n", (unsigned long)opargs->buf1, (unsigned long)opargs->buf2, opargs->count, (unsigned long)opargs->datatype); \
+         typeptr = (NBC_Fn_type*)((NBC_Args_op*)typeptr+1); \
+         break; \
+       case COPY: \
+         fprintf(fout, "[%i]  COPY   (offset %li) ", myrank, (long)typeptr-(long)schedule); \
+         copyargs = (NBC_Args_copy*)(typeptr+1); \
+         fprintf(fout, "*src: %lu, srccount: %i, srctype: %lu, *tgt: %lu, tgtcount: %i, tgttype: %lu)\n", (unsigned long)copyargs->src, copyargs->srccount, (unsigned long)copyargs->srctype, (unsigned long)copyargs->tgt, copyargs->tgtcount, (unsigned long)copyargs->tgttype); \
+         typeptr = (NBC_Fn_type*)((NBC_Args_copy*)typeptr+1); \
+         break; \
+       case UNPACK: \
+         fprintf(fout, "[%i]  UNPACK   (offset %li) ", myrank, (long)typeptr-(long)schedule); \
+         unpackargs = (NBC_Args_unpack*)(typeptr+1); \
+         fprintf(fout, "*src: %lu, srccount: %i, srctype: %lu, *tgt: %lu\n",(unsigned long)unpackargs->inbuf, unpackargs->count, (unsigned long)unpackargs->datatype, (unsigned long)unpackargs->outbuf); \
+         typeptr = (NBC_Fn_type*)((NBC_Args_unpack*)typeptr+1); \
+         break; \
+       default: \
+         printf("[%i] NBC_PRINT_ROUND: bad type %li at offset %li\n", myrank, (long)*typeptr, (long)typeptr-(long)schedule); \
+         return NBC_BAD_SCHED; \
+     } \
+     /* increase ptr by size of fn_type enum */ \
+     typeptr = (NBC_Fn_type*)((NBC_Fn_type*)typeptr+1); \
+   } \
+ }
+
+
+
 /* NBC_PRINT_ROUND prints a round in a schedule. A round has the format:
  * [num]{[op][op-data]} types: [int]{[enum][op-type]}
  * e.g. [2][SEND][SEND-ARGS][RECV][RECV-ARGS] */
