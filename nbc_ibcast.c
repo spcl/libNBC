@@ -55,16 +55,46 @@ int NBC_Ibcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Com
   
   segsize = 16384;
   /* algorithm selection */
-  if(p <= 4) {
-    alg = NBC_BCAST_LINEAR;
-  } else if(size*count < 65536) {
-    alg = NBC_BCAST_BINOMIAL;
-  } else if(size*count < 524288) {
-    alg = NBC_BCAST_CHAIN;
-    segsize = 16384/2;
+
+  MPI_Info comm_info;
+  int info_res = NBC_Comm_get_info(comm, &comm_info);
+  char alg_info[2];
+  int alg_info_exists = 0;
+
+  if (info_res) {
+    MPI_Info_get(comm_info, NBC_BCAST_ALG_INFO_KEY, 1, alg_info, &alg_info_exists);
+    //printf("NBC: key : %s (%d)!\n", alg_info, alg_info_exists);
+  } 
+
+  if (!alg_info_exists) {
+    /* algorithm selection */
+    if(p <= 4) {
+      alg = NBC_BCAST_LINEAR;
+    } else if(size*count < 65536) {
+      alg = NBC_BCAST_BINOMIAL;
+    } else if(size*count < 524288) {
+      alg = NBC_BCAST_CHAIN;
+      segsize = 16384/2;
+    } else {
+      alg = NBC_BCAST_CHAIN;
+      segsize = 65536/2;
+    }
   } else {
-    alg = NBC_BCAST_CHAIN;
-    segsize = 65536/2;
+    if (alg_info[0] == NBC_BCAST_ALG_LINEAR[0]) {
+        alg = NBC_BCAST_LINEAR;
+        //printf("NBC: key says to use linear for bcast!\n");
+    } else if (alg_info[0] == NBC_BCAST_ALG_BINOMIAL[0]) {
+        alg = NBC_BCAST_BINOMIAL;
+        //printf("NBC: key says to use binomial for bcast!\n");
+    } else if (alg_info[0] == NBC_BCAST_ALG_CHAIN[0]) { 
+        alg = NBC_BCAST_CHAIN;
+        //printf("NBC: key says to use chain for bcast!\n");
+        if (size*count < 524288) { 
+          segsize = 16384/2;
+        } else {
+          segsize = 65536/2;
+        }
+    } else assert(0);
   }
 
   handle->tmpbuf=NULL;
