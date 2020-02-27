@@ -967,16 +967,20 @@ int NBC_Start(NBC_Handle *handle, NBC_Schedule *schedule) {
   int res;
 #ifdef GOALOUTPUT
   if (getenv("LIBNBC_WRITE_SCHED")) {
-    static int sched_cnt = 1;
-    char* fname = (char*) malloc(1024);
-    int ret = snprintf(fname, 1024, "%s_sched_%i.goal", getenv("LIBNBC_WRITE_SCHED"), sched_cnt++);
-    assert(ret < 1024);
-    assert(access( fname, F_OK ) != 0); //abort if file exists
-    FILE* fout = fopen(fname, "w");
-    assert(fout);
     int commsize, myrank;
     MPI_Comm_rank(handle->mycomm, &myrank);
     MPI_Comm_size(handle->mycomm, &commsize);
+    static int sched_cnt = 1;
+    FILE* fout = NULL;
+    if (myrank == 0) {
+      char* fname = (char*) malloc(1024);
+      int ret = snprintf(fname, 1024, "%s_sched_%i.goal", getenv("LIBNBC_WRITE_SCHED"), sched_cnt++);
+      assert(ret < 1024);
+      assert(access( fname, F_OK ) != 0); //abort if file exists
+      fout = fopen(fname, "w");
+      free(fname);
+      assert(fout);
+    }
     int localsched_size;
     int* sched_sizes = (int*) malloc(commsize*sizeof(int));
     int* sched_displ = (int*) malloc(commsize*sizeof(int));
