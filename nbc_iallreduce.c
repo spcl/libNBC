@@ -161,12 +161,33 @@ printf("[%i] LibNBC after allreduce\n", r);
   }
   
   /* algorithm selection */
-  if(p < 4 || size*count < 65536) {
-    alg = NBC_ARED_BINOMIAL;
+  MPI_Info comm_info;
+  int info_res = NBC_Comm_get_info(comm, &comm_info);
+  char alg_info[2];
+  int alg_info_exists = 0;
+
+  if (info_res) {
+    MPI_Info_get(comm_info, NBC_ALLREDUCE_ALG_INFO_KEY, 1, alg_info, &alg_info_exists);
+    //printf("NBC: key : %s (%d)!\n", alg_info, alg_info_exists);
+  } 
+
+  if (!alg_info_exists) {
+    if(p < 4 || size*count < 65536) {
+      alg = NBC_ARED_BINOMIAL;
+    } else {
+      alg = NBC_ARED_RING;
+    }
   } else {
-    alg = NBC_ARED_RING;
+    if (alg_info[0] == NBC_ALLREDUCE_ALG_BINOMIAL[0]) {
+        //printf("NBC: key says to use binomial for allreduce!\n");
+        alg = NBC_ARED_BINOMIAL;
+    } else if (alg_info[0] == NBC_ALLREDUCE_ALG_RING[0]) {
+        //printf("NBC: key says to use ring for allreduce!\n");
+        alg = NBC_ARED_RING;
+    } else assert(0);
   }
-      
+
+
 #ifdef NBC_CACHE_SCHEDULE
   /* search schedule in communicator specific tree */
   search.sendbuf=sendbuf;

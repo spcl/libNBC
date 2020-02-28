@@ -41,6 +41,16 @@ extern "C" {
 /* number of implemented collective functions */
 #define NBC_NUM_COLL 19
 
+/* INFO keys for BCAST */
+#define NBC_BCAST_ALG_INFO_KEY "nbc_bcast_alg"
+#define NBC_BCAST_ALG_LINEAR "0"
+#define NBC_BCAST_ALG_BINOMIAL "1"
+#define NBC_BCAST_ALG_CHAIN "2"
+
+/* INFO keys for ALREDUCE */
+#define NBC_ALLREDUCE_ALG_INFO_KEY "nbc_allreduce_alg"
+#define NBC_ALLREDUCE_ALG_BINOMIAL "0"
+#define NBC_ALLREDUCE_ALG_RING "1"
 
 /* a schedule is basically a pointer to some memory location where the
  * schedule array resides */ 
@@ -198,6 +208,8 @@ int NBC_Operation(void *buf3, void *buf1, void *buf2, MPI_Op op, MPI_Datatype ty
 void NBC_Reset_times();
 void NBC_Print_times(double div);
 
+int NBC_Comm_set_info(MPI_Comm comm, MPI_Info info);
+int NBC_Comm_get_info(MPI_Comm comm, MPI_Info *info);
 
 #ifdef __cplusplus
 }

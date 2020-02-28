@@ -153,6 +153,41 @@ static char GNBC_Initialized=0;
 
 /* the keyval (global) */
 static int gkeyval=MPI_KEYVAL_INVALID; 
+static int ginfokeyval = MPI_KEYVAL_INVALID;
+
+static int NBC_Info_key_delete(MPI_Comm comm, int keyval, void *attribute_val, void *extra_state) {
+    free(attribute_val);
+}
+
+int NBC_Comm_set_info(MPI_Comm comm, MPI_Info info)
+{
+   //Note: we cannot use MPI_Set_info directly because MPI implentations can
+   //just discard non-recognized MPI_Info keys.
+  int res = 0;
+  if(MPI_KEYVAL_INVALID == ginfokeyval) {
+    res = MPI_Keyval_create(MPI_NULL_COPY_FN, NBC_Info_key_delete, &(ginfokeyval), NULL); 
+    if((MPI_SUCCESS != res)) { printf("Error in MPI_Keyval_create() (%i)\n", res); return res; }
+  } 
+    
+  MPI_Info *new_info = (MPI_Info *) malloc(sizeof(MPI_Info));
+  MPI_Info_dup(info, new_info);
+  MPI_Attr_put(comm, ginfokeyval, (void *) (new_info));
+  return res;
+}
+
+int NBC_Comm_get_info(MPI_Comm comm, MPI_Info *info)
+{
+  if(MPI_KEYVAL_INVALID == ginfokeyval) {
+    return 0;
+  }
+
+  int flag;
+  MPI_Info *info_tmp;
+  
+  MPI_Attr_get(comm, ginfokeyval, &info_tmp, &flag);
+  if (flag) *info = *info_tmp;
+  return flag;
+}
 
 static int NBC_Key_copy(MPI_Comm oldcomm, int keyval, void *extra_state, void *attribute_val_in, void *attribute_val_out, int *flag) {
   /* delete the attribute in the new comm  - it will be created at the
