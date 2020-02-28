@@ -1072,7 +1072,7 @@ int NBC_Start(NBC_Handle *handle, NBC_Schedule *schedule) {
 	  // all labels between label_after - label_before require oldlabel_after - oldlabel_before
 	  for (int l=label_before; l<label_after; l++) {
 	    for (int ol=oldlabel_before; ol<oldlabel_after; ol++) {
-	      fprintf(fout, "  l%i requires l%i\n", l, ol);
+	      fprintf(fout, "l%i requires l%i\n", l, ol);
 	    }
 	  }
           ptr=ptr+round_size;

@@ -15,11 +15,12 @@ int main(int argc, char** argv) {
 	MPI_Comm_size(MPI_COMM_WORLD, &commsize);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
+	/*
         MPI_Info info;
         MPI_Info_create(&info);
 	MPI_Info_set(info, NBC_BCAST_ALG_INFO_KEY, NBC_BCAST_ALG_BINOMIAL);
         NBC_Comm_set_info(MPI_COMM_WORLD, info);
-      
+      */
 
 	mpibuf = (int*) malloc(commsize*sizeof(int));
 	nbcbuf = (int*) malloc(commsize*sizeof(int));
@@ -33,7 +34,10 @@ int main(int argc, char** argv) {
 	MPI_Bcast(mpibuf, commsize, MPI_INT, 0, MPI_COMM_WORLD);
 	NBC_Ibcast(nbcbuf, commsize, MPI_INT, 0, MPI_COMM_WORLD, &handle);
 	NBC_Wait(&handle, &status);
-        MPI_Info_free(&info);
+  
+  	/*
+	MPI_Info_free(&info);
+	*/
 
 	// validate
 	for (int r=0; r<commsize; r++) {

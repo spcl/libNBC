@@ -541,12 +541,12 @@ int NBC_Create_fortran_handle(int *fhandle, NBC_Handle **handle);
      switch(*typeptr) { \
        case SEND: \
          sendargs = (NBC_Args_send*)(typeptr+1); \
-         fprintf(fout, "  l%i: send %ib to %i tag 0\n", label++, sendargs->count * ((unsigned long) sendargs->datatype), sendargs->dest); \
+         fprintf(fout, "l%i: send %ib to %i tag 0\n", label++, sendargs->count * ((unsigned long) sendargs->datatype), sendargs->dest); \
          typeptr = (NBC_Fn_type*)((NBC_Args_send*)typeptr+1); \
          break; \
        case RECV: \
          recvargs = (NBC_Args_recv*)(typeptr+1); \
-         fprintf(fout, "  l%i: recv %ib from %i tag 0\n", label++, recvargs->count * ((unsigned long) sendargs->datatype), recvargs->source); \
+         fprintf(fout, "l%i: recv %ib from %i tag 0\n", label++, recvargs->count * ((unsigned long) recvargs->datatype), recvargs->source); \
          typeptr = (NBC_Fn_type*)((NBC_Args_recv*)typeptr+1); \
          break; \
        case OP: \
