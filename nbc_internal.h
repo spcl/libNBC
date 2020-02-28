@@ -550,21 +550,21 @@ int NBC_Create_fortran_handle(int *fhandle, NBC_Handle **handle);
          typeptr = (NBC_Fn_type*)((NBC_Args_recv*)typeptr+1); \
          break; \
        case OP: \
-         fprintf(fout, "[%i]  OP   (offset %li) ", myrank, (long)typeptr-(long)schedule); \
+         /*fprintf(fout, "[%i]  OP   (offset %li) ", myrank, (long)typeptr-(long)schedule);*/ \
          opargs = (NBC_Args_op*)(typeptr+1); \
-         fprintf(fout, "*buf1: %lu, buf2: %lu, count: %i, type: %lu)\n", (unsigned long)opargs->buf1, (unsigned long)opargs->buf2, opargs->count, (unsigned long)opargs->datatype); \
+         /*fprintf(fout, "*buf1: %lu, buf2: %lu, count: %i, type: %lu)\n", (unsigned long)opargs->buf1, (unsigned long)opargs->buf2, opargs->count, (unsigned long)opargs->datatype);*/ \
          typeptr = (NBC_Fn_type*)((NBC_Args_op*)typeptr+1); \
          break; \
        case COPY: \
-         fprintf(fout, "[%i]  COPY   (offset %li) ", myrank, (long)typeptr-(long)schedule); \
+         /* fprintf(fout, "[%i]  COPY   (offset %li) ", myrank, (long)typeptr-(long)schedule);*/ \
          copyargs = (NBC_Args_copy*)(typeptr+1); \
-         fprintf(fout, "*src: %lu, srccount: %i, srctype: %lu, *tgt: %lu, tgtcount: %i, tgttype: %lu)\n", (unsigned long)copyargs->src, copyargs->srccount, (unsigned long)copyargs->srctype, (unsigned long)copyargs->tgt, copyargs->tgtcount, (unsigned long)copyargs->tgttype); \
+         /* fprintf(fout, "*src: %lu, srccount: %i, srctype: %lu, *tgt: %lu, tgtcount: %i, tgttype: %lu)\n", (unsigned long)copyargs->src, copyargs->srccount, (unsigned long)copyargs->srctype, (unsigned long)copyargs->tgt, copyargs->tgtcount, (unsigned long)copyargs->tgttype); */ \
          typeptr = (NBC_Fn_type*)((NBC_Args_copy*)typeptr+1); \
          break; \
        case UNPACK: \
-         fprintf(fout, "[%i]  UNPACK   (offset %li) ", myrank, (long)typeptr-(long)schedule); \
+         /* fprintf(fout, "[%i]  UNPACK   (offset %li) ", myrank, (long)typeptr-(long)schedule); */ \
          unpackargs = (NBC_Args_unpack*)(typeptr+1); \
-         fprintf(fout, "*src: %lu, srccount: %i, srctype: %lu, *tgt: %lu\n",(unsigned long)unpackargs->inbuf, unpackargs->count, (unsigned long)unpackargs->datatype, (unsigned long)unpackargs->outbuf); \
+         /* fprintf(fout, "*src: %lu, srccount: %i, srctype: %lu, *tgt: %lu\n",(unsigned long)unpackargs->inbuf, unpackargs->count, (unsigned long)unpackargs->datatype, (unsigned long)unpackargs->outbuf); */ \
          typeptr = (NBC_Fn_type*)((NBC_Args_unpack*)typeptr+1); \
          break; \
        default: \
