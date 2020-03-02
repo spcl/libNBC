@@ -157,6 +157,7 @@ static int ginfokeyval = MPI_KEYVAL_INVALID;
 
 static int NBC_Info_key_delete(MPI_Comm comm, int keyval, void *attribute_val, void *extra_state) {
     free(attribute_val);
+    return MPI_SUCCESS;
 }
 
 int NBC_Comm_set_info(MPI_Comm comm, MPI_Info info)
