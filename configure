@@ -3297,7 +3297,7 @@ if test "${with_mpi+set}" = set; then :
 fi
 
       if test x${MPICXX} == x; then
-          MPICXX=mpicxx
+          MPICXX=mpicc
       fi;
       if test x"${withval-yes}" != xyes; then
         # Extract the first word of "$MPICXX", so it can be a program name with args.
@@ -3381,7 +3381,7 @@ fi
         mpicxx_path=
       fi
       if test "x${mpicxx_found}" = "xno"; then
-        as_fn_error $? "${mpicxx_path}mpicxx not found" "$LINENO" 5
+        as_fn_error $? "${mpicxx_path}mpicc not found" "$LINENO" 5
       else
         CC=${mpicxx_path}$MPICXX
 

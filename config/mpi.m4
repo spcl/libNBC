@@ -15,7 +15,7 @@ AC_DEFUN([NBC_CHECK_MPI],
      AC_HELP_STRING([--with-mpi], [compile with MPI support (ARG can be the path to the root MPI directory, if mpicxx is not in PATH)]),
     )
       if test x${MPICXX} == x; then
-          MPICXX=mpicxx
+          MPICXX=mpicc
       fi;
       if test x"${withval-yes}" != xyes; then
         AC_CHECK_PROG(mpicxx_found, $MPICXX, yes, no, ${withval}/bin)
@@ -25,7 +25,7 @@ AC_DEFUN([NBC_CHECK_MPI],
         mpicxx_path=
       fi
       if test "x${mpicxx_found}" = "xno"; then
-        AC_MSG_ERROR(${mpicxx_path}mpicxx not found)
+        AC_MSG_ERROR(${mpicxx_path}mpicc not found)
       else
         CC=${mpicxx_path}$MPICXX
         AC_DEFINE(HAVE_MPI, 1, enables MPI code)
