@@ -508,49 +508,6 @@ int NBC_Ineighbor_xchg(void *sbuf, int scount, MPI_Datatype stype,
 extern "C" {
 #endif
 /* Fortran bindings */
-#ifdef HAVE_SYS_WEAK_ALIAS_PRAGMA
-NBC_F77_ALLFUNC_(nbc_comm_neighbors,NBC_COMM_NEIGHBORS,(int *fcomm, int *maxindegree, int *sources, int *sourceweights, int *maxoutdegree, int *destinations, int *destweights, int *ierr));
-#pragma weak NBC_COMM_NEIGHBORS = nbc_comm_neighbors_f
-#pragma weak nbc_comm_neighbors = nbc_comm_neighbors_f
-#pragma weak nbc_comm_neighbors_ = nbc_comm_neighbors_f
-#pragma weak nbc_comm_neighbors__ = nbc_comm_neighbors_f
-#pragma weak PNBC_COMM_NEIGHBORS = nbc_comm_neighbors_f
-#pragma weak pnbc_comm_neighbors = nbc_comm_neighbors_f
-#pragma weak pnbc_comm_neighbors_ = nbc_comm_neighbors_f
-#pragma weak pnbc_comm_neighbors__ = nbc_comm_neighbors_f
-void nbc_comm_neighbors_f(int *fcomm, int *maxindegree, int *sources, int *sourceweights, int *maxoutdegree, int *destinations, int *destweights, int *ierr) 
-#else
-void NBC_F77_FUNC_(nbc_comm_neighbors,NBC_COMM_NEIGHBORS)(int *fcomm, int *maxindegree, int *sources, int *sourceweights, int *maxoutdegree, int *destinations, int *destweights, int *ierr);
-void NBC_F77_FUNC_(nbc_comm_neighbors,NBC_COMM_NEIGHBORS)(int *fcomm, int *maxindegree, int *sources, int *sourceweights, int *maxoutdegree, int *destinations, int *destweights, int *ierr) 
-#endif
-{  
-  MPI_Comm comm;
-  comm = MPI_Comm_f2c(*fcomm);
-
-  *ierr = NBC_Comm_neighbors(comm, *maxindegree, sources, sourceweights, *maxoutdegree, destinations, destweights);
-}
-
-#ifdef HAVE_SYS_WEAK_ALIAS_PRAGMA
-NBC_F77_ALLFUNC_(nbc_comm_neighbors_count,NBC_COMM_NEIGHBORS_COUNT,(int *fcomm, int *indegree, int *outdegree, int *weighted, int *ierr));
-#pragma weak NBC_COMM_NEIGHBORS_COUNT = nbc_comm_neighbors_count_f
-#pragma weak nbc_comm_neighbors_count = nbc_comm_neighbors_count_f
-#pragma weak nbc_comm_neighbors_count_ = nbc_comm_neighbors_count_f
-#pragma weak nbc_comm_neighbors_count__ = nbc_comm_neighbors_count_f
-#pragma weak PNBC_COMM_NEIGHBORS_COUNT = nbc_comm_neighbors_count_f
-#pragma weak pnbc_comm_neighbors_count = nbc_comm_neighbors_count_f
-#pragma weak pnbc_comm_neighbors_count_ = nbc_comm_neighbors_count_f
-#pragma weak pnbc_comm_neighbors_count__ = nbc_comm_neighbors_count_f
-void nbc_comm_neighbors_count_f(int *fcomm, int *indegree, int *outdegree, int *weighted, int *ierr) 
-#else
-void NBC_F77_FUNC_(nbc_comm_neighbors_count,NBC_COMM_NEIGHBORS_COUNT)(int *fcomm, int *indegree, int *outdegree, int *weighted, int *ierr);
-void NBC_F77_FUNC_(nbc_comm_neighbors_count,NBC_COMM_NEIGHBORS_COUNT)(int *fcomm, int *indegree, int *outdegree, int *weighted, int *ierr) 
-#endif
-{
-  MPI_Comm comm;
-  comm = MPI_Comm_f2c(*fcomm);
-
-  *ierr = NBC_Comm_neighbors_count(comm, indegree, outdegree, weighted);
-}
 
 #ifdef HAVE_SYS_WEAK_ALIAS_PRAGMA
 NBC_F77_ALLFUNC_(nbc_ineighbor_xchg,NBC_INEIGHBOR_XCHG,(void *sbuf, int *scount, int *stype, void *rbuf, int *rcount,

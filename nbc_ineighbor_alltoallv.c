@@ -182,8 +182,8 @@ extern "C" {
 
 
 #ifdef HAVE_SYS_WEAK_ALIAS_PRAGMA
-NBC_F77_ALLFUNC_(nbc_ineighbor_alltoallv,NBC_INEIGHBOR_ALLTOALLV,(void *sbuf, int *scount, int *stype, void *rbuf, int *rcount,
-        int *rtype, int *fcomm, int *fhandle, int *ierr));
+NBC_F77_ALLFUNC_(nbc_ineighbor_alltoallv,NBC_INEIGHBOR_ALLTOALLV,(void *sbuf, int *scounts, int* sdispls, int *stype, void *rbuf, int *rcounts,
+        int *rdispls, int *rtype, int *fcomm, int *fhandle, int *ierr));
 #pragma weak NBC_INEIGHBOR_ALLTOALLV = nbc_ineighbor_alltoallv_f
 #pragma weak nbc_ineighbor_alltoallv = nbc_ineighbor_alltoallv_f
 #pragma weak nbc_ineighbor_alltoallv_ = nbc_ineighbor_alltoallv_f
@@ -192,8 +192,8 @@ NBC_F77_ALLFUNC_(nbc_ineighbor_alltoallv,NBC_INEIGHBOR_ALLTOALLV,(void *sbuf, in
 #pragma weak pnbc_ineighbor_alltoallv = nbc_ineighbor_alltoallv_f
 #pragma weak pnbc_ineighbor_alltoallv_ = nbc_ineighbor_alltoallv_f
 #pragma weak pnbc_ineighbor_alltoallv__ = nbc_ineighbor_alltoallv_f
-void nbc_ineighbor_alltoallv_f(void *sbuf, int *scount, int *stype, void *rbuf, int *rcount,
-        int *rtype, int *fcomm, int *fhandle, int *ierr) 
+void nbc_ineighbor_alltoallv_f(void *sbuf, int *scounts, int *sdispls,  int *stype, void *rbuf, int *rcounts,
+        int *rdispls, int *rtype, int *fcomm, int *fhandle, int *ierr) 
 #else
 void NBC_F77_FUNC_(nbc_ineighbor_alltoallv,NBC_INEIGHBOR_ALLTOALLV)(void *sbuf, int *scounts, int *sdispls, int *stype, void *rbuf, int *rcounts,
         int *rdispls, int *rtype, int *fcomm, int *fhandle, int *ierr);
