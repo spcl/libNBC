@@ -626,6 +626,12 @@ error:
   return ret;
 }
 
+int NBC_Get_schedule(NBC_Handle *handle, void** sched, int* size) {
+  *sched = (void*) handle->schedule;
+  *size = ((int*)handle->schedule)[0];
+  return NBC_OK;
+}
+
 static inline int NBC_Start_round(NBC_Handle *handle) {
   int *numptr; /* number of operations */
   int i, res, ret=NBC_OK;

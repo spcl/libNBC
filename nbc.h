@@ -210,7 +210,7 @@ void NBC_Print_times(double div);
 
 int NBC_Comm_set_info(MPI_Comm comm, MPI_Info info);
 int NBC_Comm_get_info(MPI_Comm comm, MPI_Info *info);
-
+int NBC_Get_schedule(NBC_Handle* handle, void** sched, int* size);
 #ifdef __cplusplus
 }
 #endif
