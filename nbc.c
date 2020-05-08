@@ -627,8 +627,8 @@ error:
 }
 
 int NBC_Get_schedule(NBC_Handle *handle, void** sched, int* size) {
-  *sched = (void*) handle->schedule;
-  *size = ((int*)handle->schedule)[0];
+  *sched = (void*) *(handle->schedule);
+  *size = ((int*) *(handle->schedule))[0];
   return NBC_OK;
 }
 

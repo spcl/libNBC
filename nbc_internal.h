@@ -135,70 +135,8 @@ extern "C" {
 #define NBC_CART_SHIFT_XCHG 16
 #define NBC_NEIGHBOR_XCHG 17
 /* set the number of collectives in nbc.h !!!! */
-  
-/* several typedefs for NBC */
 
-/* the function type enum */
-typedef enum {
-  SEND,
-  RECV,
-  OP,
-  COPY,
-  UNPACK
-} NBC_Fn_type;
-
-/* the send argument struct */
-typedef struct {
-  void *buf;
-  char tmpbuf;
-  int count;
-  MPI_Datatype datatype;
-  int dest;
-} NBC_Args_send;
-
-/* the receive argument struct */
-typedef struct {
-  void *buf;
-  char tmpbuf;
-  int count;
-  MPI_Datatype datatype;
-  int source;
-} NBC_Args_recv;
-
-/* the operation argument struct */
-typedef struct {
-  void *buf1;
-  char tmpbuf1;
-  void *buf2;
-  char tmpbuf2;
-  void *buf3;
-  char tmpbuf3;
-  int count;
-  MPI_Op op;
-  MPI_Datatype datatype;
-} NBC_Args_op;
-
-/* the copy argument struct */
-typedef struct {
-  void *src; 
-  char tmpsrc;
-  int srccount;
-  MPI_Datatype srctype;
-  void *tgt;
-  char tmptgt;
-  int tgtcount;
-  MPI_Datatype tgttype;
-} NBC_Args_copy;
-
-/* unpack operation arguments */
-typedef struct {
-  void *inbuf; 
-  char tmpinbuf;
-  int count;
-  MPI_Datatype datatype;
-  void *outbuf; 
-  char tmpoutbuf;
-} NBC_Args_unpack;
+#include "nbc_internal_sched.h"
 
 /* internal function prototypes */
 int NBC_Sched_create(NBC_Schedule* schedule);
