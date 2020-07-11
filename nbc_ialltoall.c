@@ -90,13 +90,13 @@ int NBC_Ialltoall(void* sendbuf, int sendcount, MPI_Datatype sendtype, void* rec
       alg = NBC_A2A_LINEAR; /*NBC_A2A_PAIRWISE;*/
   } else {
     if (alg_info[0] == NBC_ALLTOALL_ALG_LINEAR[0]) {
-      printf("NBC: key says to use linear for a2a!\n");
+      //printf("NBC: key says to use linear for a2a!\n");
       alg = NBC_A2A_LINEAR;
     } else if (alg_info[0] == NBC_ALLTOALL_ALG_DISSEMINATION[0]) {
-      printf("NBC: key says to use dissemination for a2a!\n");
+      //printf("NBC: key says to use dissemination for a2a!\n");
       alg = NBC_A2A_DISS;
     } else if (alg_info[0] == NBC_ALLTOALL_ALG_PAIRWISE[0]){
-      printf("NBC: key says to use pairwise for a2a!\n");
+      //printf("NBC: key says to use pairwise for a2a!\n");
       alg = NBC_A2A_PAIRWISE;
     } else assert(0);
   }

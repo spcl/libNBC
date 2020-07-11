@@ -86,10 +86,10 @@ int NBC_Ireduce(void* sendbuf, void* recvbuf, int count, MPI_Datatype datatype, 
     }
   } else {
     if (alg_info[0] == NBC_REDUCE_ALG_BINOMIAL[0]) {
-      printf("NBC: key says to use binomial for reduce!\n");
+      //printf("NBC: key says to use binomial for reduce!\n");
       alg = NBC_RED_BINOMIAL;
     } else if (alg_info[0] == NBC_REDUCE_ALG_CHAIN[0]) {
-      printf("NBC: key says to use chain for reduce!\n");
+      //printf("NBC: key says to use chain for reduce!\n");
       alg = NBC_RED_CHAIN;
     } else assert(0);
   }
