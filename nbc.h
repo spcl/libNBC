@@ -52,6 +52,17 @@ extern "C" {
 #define NBC_ALLREDUCE_ALG_BINOMIAL "0"
 #define NBC_ALLREDUCE_ALG_RING "1"
 
+/* INFO keys for ALLTOALL */
+#define NBC_ALLTOALL_ALG_INFO_KEY "nbc_alltoall_alg"
+#define NBC_ALLTOALL_ALG_LINEAR "0"
+#define NBC_ALLTOALL_ALG_DISSEMINATION "1"
+#define NBC_ALLTOALL_ALG_PAIRWISE "2"
+
+/* INFO keys for REDUCE */ 
+#define NBC_REDUCE_ALG_INFO_KEY "nbc_alltoall_alg"
+#define NBC_REDUCE_ALG_BINOMIAL "0"
+#define NBC_REDUCE_ALG_CHAIN "1"
+
 /* a schedule is basically a pointer to some memory location where the
  * schedule array resides */ 
 typedef void* NBC_Schedule;

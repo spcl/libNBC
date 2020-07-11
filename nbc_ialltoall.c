@@ -65,18 +65,41 @@ int NBC_Ialltoall(void* sendbuf, int sendcount, MPI_Datatype sendtype, void* rec
   if (MPI_SUCCESS != res) { printf("MPI Error in MPI_Type_size() (%i)\n", res); return res; }
 
   /* algorithm selection */
-  a2asize = sndsize*sendcount*p;
-  /* this number is optimized for TCP on odin.cs.indiana.edu */
-  if((p <= 8) && ((a2asize < 1<<17) || (sndsize*sendcount < 1<<12))) {
-    /* just send as fast as we can if we have less than 8 peers, if the
-     * total communicated size is smaller than 1<<17 *and* if we don't
-     * have eager messages (msgsize < 1<<13) */
-    alg = NBC_A2A_LINEAR;
-  } else if(a2asize < (1<<12)*p) {
-    /*alg = NBC_A2A_DISS;*/
-    alg = NBC_A2A_LINEAR;
-  } else
-    alg = NBC_A2A_LINEAR; /*NBC_A2A_PAIRWISE;*/
+  MPI_Info comm_info;
+  int info_res = NBC_Comm_get_info(comm, &comm_info);
+  char alg_info[2];
+  int alg_info_exists = 0;
+
+  if (info_res) {
+    MPI_Info_get(comm_info, NBC_ALLTOALL_ALG_INFO_KEY, 1, alg_info, &alg_info_exists);
+    //printf("NBC: key : %s (%d)!\n", alg_info, alg_info_exists);
+  } 
+
+  if (!alg_info_exists) {
+    a2asize = sndsize*sendcount*p;
+    /* this number is optimized for TCP on odin.cs.indiana.edu */
+    if((p <= 8) && ((a2asize < 1<<17) || (sndsize*sendcount < 1<<12))) {
+      /* just send as fast as we can if we have less than 8 peers, if the
+      * total communicated size is smaller than 1<<17 *and* if we don't
+      * have eager messages (msgsize < 1<<13) */
+      alg = NBC_A2A_LINEAR;
+    } else if(a2asize < (1<<12)*p) {
+      /*alg = NBC_A2A_DISS;*/
+      alg = NBC_A2A_LINEAR;
+    } else
+      alg = NBC_A2A_LINEAR; /*NBC_A2A_PAIRWISE;*/
+  } else {
+    if (alg_info[0] == NBC_ALLTOALL_ALG_LINEAR[0]) {
+      printf("NBC: key says to use linear for a2a!\n");
+      alg = NBC_A2A_LINEAR;
+    } else if (alg_info[0] == NBC_ALLTOALL_ALG_DISSEMINATION[0]) {
+      printf("NBC: key says to use dissemination for a2a!\n");
+      alg = NBC_A2A_DISS;
+    } else if (alg_info[0] == NBC_ALLTOALL_ALG_PAIRWISE[0]){
+      printf("NBC: key says to use pairwise for a2a!\n");
+      alg = NBC_A2A_PAIRWISE;
+    } else assert(0);
+  }
 
   if(!inplace) {
     /* copy my data to receive buffer */
