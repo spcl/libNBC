@@ -68,8 +68,34 @@ int NBC_Ireduce(void* sendbuf, void* recvbuf, int count, MPI_Datatype datatype, 
   }
   
   /* algorithm selection */
-  if(p > 4 || size*count < 65536) {
-    alg = NBC_RED_BINOMIAL;
+  MPI_Info comm_info;
+  int info_res = NBC_Comm_get_info(comm, &comm_info);
+  char alg_info[2];
+  int alg_info_exists = 0;
+
+  if (info_res) {
+    MPI_Info_get(comm_info, NBC_REDUCE_ALG_INFO_KEY, 1, alg_info, &alg_info_exists);
+    //printf("NBC: key : %s (%d)!\n", alg_info, alg_info_exists);
+  } 
+
+  if (!alg_info_exists) {
+    if(p > 4 || size*count < 65536) {
+      alg = NBC_RED_BINOMIAL;
+    } else {
+      alg = NBC_RED_CHAIN;
+    }
+  } else {
+    if (alg_info[0] == NBC_REDUCE_ALG_BINOMIAL[0]) {
+      //printf("NBC: key says to use binomial for reduce!\n");
+      alg = NBC_RED_BINOMIAL;
+    } else if (alg_info[0] == NBC_REDUCE_ALG_CHAIN[0]) {
+      //printf("NBC: key says to use chain for reduce!\n");
+      alg = NBC_RED_CHAIN;
+    } else assert(0);
+  }
+
+  /* buffer allocation */
+  if (alg==NBC_RED_BINOMIAL){
     if(rank == root) {
       /* root reduces in receivebuffer */
       handle->tmpbuf = malloc(ext*count);
@@ -80,9 +106,8 @@ int NBC_Ireduce(void* sendbuf, void* recvbuf, int count, MPI_Datatype datatype, 
     }
   } else {
     handle->tmpbuf = malloc(ext*count);
-    alg = NBC_RED_CHAIN;
     segsize = 16384/2;
-  }
+  } 
   if (NULL == handle->tmpbuf) { printf("Error in malloc() (%i)\n", res); return res; }
 
 #ifdef NBC_CACHE_SCHEDULE
